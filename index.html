@@ -1,1 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D Highway Car Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #111;
+            font-family: sans-serif;
+            touch-action: none;
+        }
+        #hud {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            pointer-events: none;
+            z-index: 5;
+        }
+        .hud-card {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .control-group {
+            display: flex;
+            gap: 15px;
+            pointer-events: auto;
+        }
+        .btn {
+            width: 75px;
+            height: 75px;
+            background: linear-gradient(135deg, #dcdcdc, #aaaaaa);
+            border: 2px solid #ffffff;
+            border-radius: 12px;
+            color: #333;
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            transition: transform 0.05s, background 0.05s;
+            outline: none;
+        }
+        .btn:active, .btn.active {
+            background: linear-gradient(135deg, #999, #777);
+            color: #fff;
+            transform: scale(0.92);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+    }
+        /* Pedals style look matching the reference image */
+        .pedal-brake {
+            background: linear-gradient(135deg, #cccccc, #999999);
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+        .pedal-acc {
+            background: linear-gradient(135deg, #dcdcdc, #b5b5b5);
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.95);
+            padding: 30px 40px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            display: none;
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 20;
+        }
+        #game-over h1 { margin-top: 0; color: #ff4757; font-size: 24px; }
+        #game-over button {
+            padding: 12px 24px;
+            background: #2ed573;
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        #orientation-notice {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #fff;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+            padding: 20px;
+        }
+        @media screen and (orientation: portrait) {
+            #orientation-notice {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="orientation-notice">
+        <h2>Please Rotate Your Phone</h2>
+        <p>Aap apne mobile ko landscape mode mein ghuma lein!</p>
+    </div>
+
+    <div id="hud">
+        <div class="hud-card">Speed: <span id="speed-val">0</span> km/h</div>
+        <div class="hud-card">Distance: <span id="dist-val">0</span> m</div>
+    </div>
+
+    <div id="controls">
+        <!-- Left side: Steer Left / Right arrows -->
+        <div class="control-group">
+            <div class="btn" id="btn-left">‹</div>
+            <div class="btn" id="btn-right">›</div>
+        </div>
+        <!-- Right side: Brake and Acceleration pedals -->
+        <div class="control-group">
+            <div class="btn pedal-brake" id="btn-down">BRK</div>
+            <div class="btn pedal-acc" id="btn-up">ACC</div>
+        </div>
+    </div>
+
+    <div id="game-over">
+        <h1>CRASHED!</h1>
+        <p>Distance: <span id="final-dist">0</span> m</p>
+        <button onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/MTLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
 
