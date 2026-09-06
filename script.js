@@ -127,39 +127,28 @@ function createRoadSegment(zPos) {
 function createCar() {
     car = new THREE.Group();
     
-    // Shiny Metallic Red Material for the Car Body
+    // Shiny Metallic Red Material for the Car Model
     const shinyRedMat = new THREE.MeshStandardMaterial({
         color: 0xee1122,
         metalness: 0.85,
-        roughness: 0.2,
-        envMapIntensity: 1.0
-    });
-
-    // Dark Glossy Material for Windows/Tyres/Details
-    const darkMat = new THREE.MeshStandardMaterial({
-        color: 0x151515,
-        metalness: 0.5,
-        roughness: 0.3
+        roughness: 0.2
     });
 
     const objLoader = new THREE.OBJLoader();
-    objLoader.load('Chevrolet_Camaro_SS_Low.obj', function (object) {
+    // Path updated to match your 'carmodel' folder structure
+    objLoader.load('carmodel/Chevrolet_Camaro_SS_Low.obj', function (object) {
         object.traverse((child) => {
             if (child.isMesh) {
-                // Remove unwanted ground plane/shadow meshes if present in model
                 if (child.name.toLowerCase().includes('plane') || child.geometry.boundingSphere?.radius > 15) {
                     child.visible = false;
                     return;
                 }
-                
-                // Apply shiny red material to car parts
                 child.material = shinyRedMat;
                 child.castShadow = true;
                 child.receiveShadow = true;
             }
         });
 
-        // Scale and Center the Camaro Model properly
         object.scale.set(0.75, 0.75, 0.75);
 
         const box = new THREE.Box3().setFromObject(object);
@@ -167,12 +156,11 @@ function createCar() {
         object.position.sub(center);
         object.position.y += (box.max.y - box.min.y) / 2;
 
-        // Face the car forward
         object.rotation.y = Math.PI;
 
         car.add(object);
     }, undefined, function (error) {
-        console.error('Error loading Chevrolet_Camaro_SS_Low.obj:', error);
+        console.error('Error loading car model from carmodel folder:', error);
     });
 
     car.position.set(0, 0, 0);
@@ -294,3 +282,4 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
+
