@@ -26,10 +26,10 @@ function init() {
     renderer.toneMappingExposure = 1.3;
     document.body.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xffeedd, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xffeedd, 0.8);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfffaee, 1.2);
+    const sunLight = new THREE.DirectionalLight(0xfffaee, 1.4);
     sunLight.position.set(60, 120, 40);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 2048;
@@ -146,25 +146,38 @@ function createCar() {
                 }
             });
 
-            // Center object box alignment & flip it so it faces forward (not backward/upside down)
+            // Proper Scaling and Centering for sdxcar.obj
+            object.scale.set(0.85, 0.85, 0.85);
+
             const box = new THREE.Box3().setFromObject(object);
             const center = box.getCenter(new THREE.Vector3());
             object.position.sub(center);
             object.position.y += (box.max.y - box.min.y) / 2;
-            
-            // Correct orientation rotation (making sure it's straight and facing front)
+
+            // Ensure car faces straight forward correctly
             object.rotation.y = Math.PI;
 
             car.add(object);
         }, undefined, function (error) {
             console.error('Error loading sdxcar.obj:', error);
+            fallbackBoxCar();
         });
     }, undefined, function (error) {
         console.error('Error loading sdxcar.mtl:', error);
+        fallbackBoxCar();
     });
 
     car.position.set(0, 0, 0);
     scene.add(car);
+}
+
+function fallbackBoxCar() {
+    const geo = new THREE.BoxGeometry(1.6, 0.8, 3.2);
+    const mat = new THREE.MeshStandardMaterial({ color: 0x3366ff });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.y = 0.4;
+    mesh.castShadow = true;
+    car.add(mesh);
 }
 
 function setupControls() {
