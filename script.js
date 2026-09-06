@@ -26,10 +26,10 @@ function init() {
     renderer.toneMappingExposure = 1.3;
     document.body.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xffeedd, 0.8);
+    const ambientLight = new THREE.AmbientLight(0xffeedd, 0.9);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfffaee, 1.4);
+    const sunLight = new THREE.DirectionalLight(0xfffaee, 1.6);
     sunLight.position.set(60, 120, 40);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 2048;
@@ -127,60 +127,56 @@ function createRoadSegment(zPos) {
 function createCar() {
     car = new THREE.Group();
     
-    const mtlLoader = new THREE.MTLLoader();
-    mtlLoader.load('Chevrolet_Camaro_SS_Low.mtl', function (materials) {
-        materials.preload();
-        
-        for (let matName in materials.materials) {
-            let mat = materials.materials[matName];
-            mat.side = THREE.DoubleSide;
-        }
+    // Shiny Metallic Red Material for the Car Body
+    const shinyRedMat = new THREE.MeshStandardMaterial({
+        color: 0xee1122,
+        metalness: 0.85,
+        roughness: 0.2,
+        envMapIntensity: 1.0
+    });
 
-        const objLoader = new THREE.OBJLoader();
-        objLoader.setMaterials(materials);
-        objLoader.load('Chevrolet_Camaro_SS_Low.obj', function (object) {
-            object.traverse((child) => {
-                if (child.isMesh) {
-                    if (child.name.toLowerCase().includes('plane') || child.geometry.boundingSphere?.radius > 15) {
-                        child.visible = false;
-                        return;
-                    }
-                    child.castShadow = true;
-                    child.receiveShadow = true;
+    // Dark Glossy Material for Windows/Tyres/Details
+    const darkMat = new THREE.MeshStandardMaterial({
+        color: 0x151515,
+        metalness: 0.5,
+        roughness: 0.3
+    });
+
+    const objLoader = new THREE.OBJLoader();
+    objLoader.load('Chevrolet_Camaro_SS_Low.obj', function (object) {
+        object.traverse((child) => {
+            if (child.isMesh) {
+                // Remove unwanted ground plane/shadow meshes if present in model
+                if (child.name.toLowerCase().includes('plane') || child.geometry.boundingSphere?.radius > 15) {
+                    child.visible = false;
+                    return;
                 }
-            });
-
-            // Adjust scaling if needed for Camaro model
-            object.scale.set(0.8, 0.8, 0.8);
-
-            const box = new THREE.Box3().setFromObject(object);
-            const center = box.getCenter(new THREE.Vector3());
-            object.position.sub(center);
-            object.position.y += (box.max.y - box.min.y) / 2;
-
-            object.rotation.y = Math.PI;
-
-            car.add(object);
-        }, undefined, function (error) {
-            console.error('Error loading Camaro obj:', error);
-            fallbackBoxCar();
+                
+                // Apply shiny red material to car parts
+                child.material = shinyRedMat;
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
         });
+
+        // Scale and Center the Camaro Model properly
+        object.scale.set(0.75, 0.75, 0.75);
+
+        const box = new THREE.Box3().setFromObject(object);
+        const center = box.getCenter(new THREE.Vector3());
+        object.position.sub(center);
+        object.position.y += (box.max.y - box.min.y) / 2;
+
+        // Face the car forward
+        object.rotation.y = Math.PI;
+
+        car.add(object);
     }, undefined, function (error) {
-        console.error('Error loading Camaro mtl:', error);
-        fallbackBoxCar();
+        console.error('Error loading Chevrolet_Camaro_SS_Low.obj:', error);
     });
 
     car.position.set(0, 0, 0);
     scene.add(car);
-}
-
-function fallbackBoxCar() {
-    const geo = new THREE.BoxGeometry(1.6, 0.8, 3.2);
-    const mat = new THREE.MeshStandardMaterial({ color: 0x3366ff });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.y = 0.4;
-    mesh.castShadow = true;
-    car.add(mesh);
 }
 
 function setupControls() {
@@ -261,7 +257,6 @@ function animate() {
     camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 0.1);
     camera.updateProjectionMatrix();
 
-    // Close camera position
     camera.position.x = car.position.x * 0.4;
     camera.position.y = THREE.MathUtils.lerp(camera.position.y, car.position.y + 2.2, 0.1);
     camera.position.z = THREE.MathUtils.lerp(camera.position.z, car.position.z + 4.2, 0.1);
@@ -299,4 +294,3 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
-
