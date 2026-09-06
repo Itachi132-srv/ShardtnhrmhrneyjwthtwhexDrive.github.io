@@ -141,6 +141,11 @@ function createCar() {
         objLoader.load('sdxcar.obj', function (object) {
             object.traverse((child) => {
                 if (child.isMesh) {
+                    // Remove unwanted bottom shadow plane/glitch mesh if present in model
+                    if (child.name.toLowerCase().includes('plane') || child.geometry.boundingSphere?.radius > 10) {
+                        child.visible = false;
+                        return;
+                    }
                     child.castShadow = true;
                     child.receiveShadow = true;
                 }
@@ -258,10 +263,11 @@ function animate() {
     camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 0.1);
     camera.updateProjectionMatrix();
 
+    // Camera closer to the car
     camera.position.x = car.position.x * 0.4;
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, car.position.y + 3.2, 0.1);
-    camera.position.z = THREE.MathUtils.lerp(camera.position.z, car.position.z + 6.5, 0.1);
-    camera.lookAt(car.position.x, car.position.y + 0.8, car.position.z - 2.5);
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, car.position.y + 2.2, 0.1);
+    camera.position.z = THREE.MathUtils.lerp(camera.position.z, car.position.z + 4.2, 0.1);
+    camera.lookAt(car.position.x, car.position.y + 0.5, car.position.z - 2.0);
 
     const speedEl = document.getElementById('speed-val');
     const distEl = document.getElementById('dist-val');
@@ -295,4 +301,3 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
-
