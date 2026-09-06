@@ -128,7 +128,7 @@ function createCar() {
     car = new THREE.Group();
     
     const mtlLoader = new THREE.MTLLoader();
-    mtlLoader.load('sdxcar.mtl', function (materials) {
+    mtlLoader.load('Chevrolet_Camaro_SS_Low.mtl', function (materials) {
         materials.preload();
         
         for (let matName in materials.materials) {
@@ -138,11 +138,10 @@ function createCar() {
 
         const objLoader = new THREE.OBJLoader();
         objLoader.setMaterials(materials);
-        objLoader.load('sdxcar.obj', function (object) {
+        objLoader.load('Chevrolet_Camaro_SS_Low.obj', function (object) {
             object.traverse((child) => {
                 if (child.isMesh) {
-                    // Remove unwanted bottom shadow plane/glitch mesh if present in model
-                    if (child.name.toLowerCase().includes('plane') || child.geometry.boundingSphere?.radius > 10) {
+                    if (child.name.toLowerCase().includes('plane') || child.geometry.boundingSphere?.radius > 15) {
                         child.visible = false;
                         return;
                     }
@@ -151,24 +150,23 @@ function createCar() {
                 }
             });
 
-            // Proper Scaling and Centering for sdxcar.obj
-            object.scale.set(0.85, 0.85, 0.85);
+            // Adjust scaling if needed for Camaro model
+            object.scale.set(0.8, 0.8, 0.8);
 
             const box = new THREE.Box3().setFromObject(object);
             const center = box.getCenter(new THREE.Vector3());
             object.position.sub(center);
             object.position.y += (box.max.y - box.min.y) / 2;
 
-            // Ensure car faces straight forward correctly
             object.rotation.y = Math.PI;
 
             car.add(object);
         }, undefined, function (error) {
-            console.error('Error loading sdxcar.obj:', error);
+            console.error('Error loading Camaro obj:', error);
             fallbackBoxCar();
         });
     }, undefined, function (error) {
-        console.error('Error loading sdxcar.mtl:', error);
+        console.error('Error loading Camaro mtl:', error);
         fallbackBoxCar();
     });
 
@@ -263,7 +261,7 @@ function animate() {
     camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 0.1);
     camera.updateProjectionMatrix();
 
-    // Camera closer to the car
+    // Close camera position
     camera.position.x = car.position.x * 0.4;
     camera.position.y = THREE.MathUtils.lerp(camera.position.y, car.position.y + 2.2, 0.1);
     camera.position.z = THREE.MathUtils.lerp(camera.position.z, car.position.z + 4.2, 0.1);
@@ -301,3 +299,4 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
+
